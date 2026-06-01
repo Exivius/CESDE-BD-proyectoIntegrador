@@ -48,14 +48,18 @@ ON C.clienteId = T.fkClienteId
 WHERE T.fechaCompra <= DATEADD(month, -3, GETDATE());
 
 CREATE PROCEDURE usp_Cambio_Estado
+/*Se piede el numero de meses para restarlo a la fecha actual y traer
+Los clientes que coincidan con el criterio*/
 @meses INT
 AS
 BEGIN
 	UPDATE tblClientes
+	--El estado dos es inactivo
 	SET estadoId = 2
 	from tblClientes AS C
 	INNER JOIN tblTickets AS T
 	ON C.clienteId = T.fkClienteId
+	--Usando el parametro de entrada, le resta los meses ingresados a la fecha actual
 	WHERE T.fechaCompra <= DATEADD(month, -@meses, GETDATE());
 END;
 
@@ -82,19 +86,23 @@ ALTER PROCEDURE usp_Registrar_Compra
 @funcionId INT
 AS
 BEGIN
+	--Pregunta si existe el cliente
 	IF NOT EXISTS (SELECT clienteId FROM tblClientes WHERE clienteId = @clienteId)
 	BEGIN
 		SELECT 'El cliente no existe'
 	END
 	ELSE
+		--Pregunta si existe la función
 		IF NOT EXISTS (SELECT funcionId FROM tblFunciones WHERE funcionId = @funcionId)
 		BEGIN
 			SELECT 'La funcion no existe'
 		END
 		ELSE
+			--Inserta el registro en la tabla de tickets
 			INSERT INTO tblTickets (cantidadTickets,precioTotalPagado,fkClienteId,fkFuncionId)
 			VALUES(@cantidadTickets,@precioTotal,@clienteId,@funcionId);
 			SELECT 'Compra realizada con éxito';
+			--Le resta a la capacidad de la sala basado en la cantidad de tickets que compra el cliente
 			UPDATE tblSalas
 			SET capacidad = capacidad - @cantidadTickets
 			FROM tblSalas AS S
