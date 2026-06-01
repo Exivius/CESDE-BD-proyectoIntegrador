@@ -79,7 +79,7 @@ ON F.fkPeliculaId = P.peliculaID;
 que reciba los parámetros necesarios (Cliente, Función, Cantidad, Precio)
 e inserte automáticamente un registro en la tabla Tickets.*/
 
-ALTER PROCEDURE usp_Registrar_Compra
+CREATE PROCEDURE usp_Registrar_Compra
 @cantidadTickets TINYINT,
 @precioTotal FLOAT,
 @clienteId INT,
